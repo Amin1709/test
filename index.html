@@ -194,6 +194,7 @@ input:focus-visible,textarea:focus-visible{border-color:var(--accent)}
   padding:6px 8px;border-radius:8px;cursor:pointer;
   text-decoration:underline;text-underline-offset:3px;
 }
+.remove[hidden]{display:none}
 .remove:hover{color:var(--accent)}
 
 .pills{display:flex;flex-wrap:wrap;gap:8px}
@@ -340,6 +341,7 @@ button{font:inherit;cursor:pointer}
     <div id="summary" class="summary"></div>
     <button class="btn btn-wa" id="send" type="button">Envoyer sur WhatsApp</button>
     <button class="btn btn-ghost" id="copy" type="button">Copier les réponses</button>
+    <p class="fine" id="status" role="status" aria-live="polite"></p>
     <p class="fine">L'envoi passe par WhatsApp. Rien n'est enregistré sur un serveur.</p>
   </section>
 
@@ -347,6 +349,7 @@ button{font:inherit;cursor:pointer}
 
 <script>
 const subjects = document.getElementById('subjects');
+function flash(t){const s=document.getElementById('status');s.textContent=t;s.style.color='var(--accent)';}
 let uid = 0;
 
 function add() {
@@ -377,7 +380,7 @@ function add() {
     </div>`;
   d.querySelector('.remove').onclick = () => {
     if (subjects.children.length > 1) { d.remove(); renumber(); }
-    else alert('Il faut au moins une matière.');
+    
   };
   subjects.append(d);
   renumber();
@@ -387,6 +390,7 @@ function add() {
 function renumber() {
   [...subjects.children].forEach((e, i) => {
     e.querySelector('h3').textContent = 'Matière ' + (i + 1);
+    e.querySelector('.remove').hidden = subjects.children.length < 2;
   });
 }
 
@@ -450,8 +454,8 @@ document.getElementById('send').onclick = () =>
   window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener');
 
 document.getElementById('copy').onclick = async () => {
-  try { await navigator.clipboard.writeText(message); alert('Réponses copiées.'); }
-  catch { alert('Sélectionne le texte et copie-le à la main.'); }
+  try { await navigator.clipboard.writeText(message); flash('Réponses copiées.'); }
+  catch { flash('Sélectionne le texte et copie-le à la main.'); }
 };
 </script>
 </body>
