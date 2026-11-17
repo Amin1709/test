@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planning de révision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Caveat:wght@500;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a handwritten note on top, then the form as a left-aligned notebook with numbered steps. */
+:root{
+  --paper:#eceff3;
+  --card:#fbfbfd;
+  --ink:#1c2733;
+  --muted:#5b6978;
+  --line:#d3d9e1;
+  --accent:#b4285a;
+  --accent-ink:#ffffff;
+  --accent-soft:#f6dde6;
+  --hl:#ffd966;
+  --ok:#157347;
+  --font-display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --font-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-hand:"Caveat","Segoe Print","Bradley Hand",cursive;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12171d;
+    --card:#1b222a;
+    --ink:#e9edf1;
+    --muted:#9ba8b5;
+    --line:#33404d;
+    --accent:#f08bb0;
+    --accent-ink:#2b0b18;
+    --accent-soft:#3a2230;
+    --hl:#6a5614;
+    --ok:#5fd397;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12171d;
+  --card:#1b222a;
+  --ink:#e9edf1;
+  --muted:#9ba8b5;
+  --line:#33404d;
+  --accent:#f08bb0;
+  --accent-ink:#2b0b18;
+  --accent-soft:#3a2230;
+  --hl:#6a5614;
+  --ok:#5fd397;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  padding:28px 18px 64px;
+}
+.wrap{max-width:640px;margin:0 auto}
+
+/* Note */
+.note{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:6px 18px 18px 18px;
+  padding:26px 26px 24px;
+  transform:rotate(-0.8deg);
+  box-shadow:0 1px 0 var(--line),0 14px 30px -18px rgba(20,30,50,.35);
+}
+.note::before{
+  content:"";
+  position:absolute;top:-11px;left:28px;width:84px;height:22px;
+  background:var(--hl);opacity:.8;transform:rotate(-3deg);border-radius:2px;
+}
+.to{
+  font-family:var(--font-hand);
+  font-size:42px;
+  line-height:1.05;
+  font-weight:700;
+  margin:6px 0 10px;
+  color:var(--accent);
+  display:flex;align-items:center;gap:10px;
+}
+.to svg{width:30px;height:30px;flex:none}
+.note p{margin:0 0 10px;max-width:60ch;text-wrap:pretty}
+.note .sign{
+  font-family:var(--font-hand);
+  font-size:28px;font-weight:700;line-height:1;margin:14px 0 0;color:var(--ink);
+}
+
+/* Page title */
+.title{margin:44px 0 6px;display:flex;flex-direction:column;gap:6px}
+.title h1{
+  font-family:var(--font-display);
+  font-size:clamp(30px,7vw,40px);
+  line-height:1.08;
+  letter-spacing:-.02em;
+  margin:0;
+  text-wrap:balance;
+}
+.title h1 mark{
+  background:linear-gradient(transparent 58%,var(--hl) 58%,var(--hl) 92%,transparent 92%);
+  color:inherit;padding:0 .08em;
+}
+.title p{margin:0;color:var(--muted)}
+
+/* Steps */
+.step{
+  margin-top:34px;
+  display:grid;
+  grid-template-columns:44px 1fr;
+  column-gap:14px;
+}
+.step-num{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;
+  font-family:var(--font-display);font-weight:700;font-size:17px;
+  margin-top:2px;
+}
+.step h2{
+  font-family:var(--font-display);
+  font-size:22px;line-height:1.2;letter-spacing:-.01em;
+  margin:6px 0 4px;
+}
+.step-hint{margin:0 0 14px;color:var(--muted);font-size:15px}
+.step-body{grid-column:2}
+@media (max-width:420px){
+  .step{grid-template-columns:1fr}
+  .step-body{grid-column:1}
+  .step-num{margin-bottom:6px}
+}
+
+label,.lbl{
+  display:block;
+  font-weight:600;font-size:15px;
+  margin:0 0 6px;
+}
+.field{margin-top:16px}
+.field:first-child{margin-top:0}
+input[type=text],input[type=date],input[type=number],textarea,input:not([type]){
+  width:100%;
+  font:inherit;color:var(--ink);
+  background:var(--card);
+  border:1.5px solid var(--line);
+  border-radius:10px;
+  padding:11px 13px;
+  min-height:46px;
+}
+textarea{min-height:92px;resize:vertical}
+::placeholder{color:var(--muted);opacity:.75}
+input:focus-visible,textarea:focus-visible,button:focus-visible,.pill input:focus-visible+span{
+  outline:3px solid var(--accent);outline-offset:2px;
+}
+input:focus-visible,textarea:focus-visible{border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:480px){.grid{grid-template-columns:1fr}}
+.opt{color:var(--muted);font-weight:500}
+
+.countdown{
+  margin:14px 0 0;
+  font-family:var(--font-hand);
+  font-size:26px;line-height:1.1;font-weight:700;color:var(--accent);
+  min-height:1.1em;
+}
+
+/* Subjects */
+.subject{
+  position:relative;
+  background:var(--card);
+  border:1.5px solid var(--line);
+  border-left:6px solid var(--accent);
+  border-radius:6px 14px 14px 6px;
+  padding:16px 16px 18px;
+  margin-bottom:14px;
+}
+.subjecthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.subjecthead h3{
+  font-family:var(--font-hand);font-size:28px;line-height:1;margin:0;font-weight:700;
+}
+.remove{
+  background:none;border:0;color:var(--muted);
+  font:inherit;font-size:14px;font-weight:600;
+  padding:6px 8px;border-radius:8px;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;
+}
+.remove:hover{color:var(--accent)}
+
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{position:relative}
+.pill input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.pill span{
+  display:inline-block;
+  padding:9px 16px;
+  border:1.5px solid var(--line);
+  border-radius:999px;
+  font-weight:600;font-size:15px;
+  background:var(--card);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.pill input:checked+span{
+  background:var(--accent);border-color:var(--accent);color:var(--accent-ink);
+}
+.pill input:not(:checked):hover+span{border-color:var(--accent)}
+
+/* Buttons */
+button{font:inherit;cursor:pointer}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:0;border-radius:12px;
+  padding:13px 20px;min-height:48px;
+  font-weight:700;font-size:16px;
+}
+.btn-add{
+  background:transparent;color:var(--ink);
+  border:1.5px dashed var(--muted);
+  width:100%;
+}
+.btn-add:hover{border-color:var(--accent);color:var(--accent)}
+.btn-main{background:var(--accent);color:var(--accent-ink);width:100%;margin-top:22px}
+.btn-main:hover{filter:brightness(1.07)}
+.btn-wa{background:#1f9d5c;color:#fff;width:100%}
+.btn-wa:hover{filter:brightness(1.07)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);width:100%;margin-top:10px}
+.btn-ghost:hover{border-color:var(--accent)}
+
+/* Result */
+.result{margin-top:44px;padding-top:30px;border-top:2px dashed var(--line)}
+.result[hidden]{display:none}
+.result h2{
+  font-family:var(--font-display);font-size:24px;letter-spacing:-.01em;margin:0 0 4px;
+}
+.result .step-hint{margin-bottom:16px}
+.summary{
+  white-space:pre-wrap;
+  background:var(--accent-soft);
+  border-radius:16px 16px 16px 4px;
+  padding:16px 18px;
+  line-height:1.6;font-size:16px;
+  margin-bottom:16px;
+}
+.fine{color:var(--muted);font-size:14px;margin:14px 0 0}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+  .note{transform:none}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="note">
+    <div class="to">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 2.8 4.5 6.4 4.5c2.2 0 3.7 1.2 5.6 3.5 1.9-2.3 3.4-3.5 5.6-3.5 3.6 0 5.5 3.7 4 7.2C19.5 16.4 12 21 12 21z"/></svg>
+      Pour mon trésor
+    </div>
+    <p>Hey coucou mon trésor, je comptais te préparer un planning de révision. Tu devras remplir ce formulaire et m'envoyer les réponses. Je m'occuperai ensuite de ton planning.</p>
+    <p>Mais xabibti, tu devras le suivre à la lettre. Je crois en toi et je sais que tu vas dead comme d'habitude.</p>
+    <p class="sign">Ton mari</p>
+  </header>
+
+  <div class="title">
+    <h1>Ton <mark>planning de révision</mark></h1>
+    <p>Trois étapes, cinq minutes.</p>
+  </div>
+
+  <form id="form" novalidate>
+
+    <section class="step" aria-labelledby="h-infos">
+      <div class="step-num" aria-hidden="true">1</div>
+      <div>
+        <h2 id="h-infos">Tes dates et ton temps</h2>
+        <p class="step-hint">De quoi je pars pour répartir les journées.</p>
+      </div>
+      <div class="step-body">
+        <div class="grid">
+          <div class="field">
+            <label for="start">Début des révisions</label>
+            <input id="start" type="date" required>
+          </div>
+          <div class="field">
+            <label for="exam">Premier examen</label>
+            <input id="exam" type="date" required>
+          </div>
+        </div>
+        <p class="countdown" id="countdown" aria-live="polite"></p>
+        <div class="field">
+          <label for="hours">Heures de révision par jour</label>
+          <input id="hours" type="number" inputmode="decimal" min="0.5" max="18" step="0.5" required placeholder="Ex. 4">
+        </div>
+        <div class="field">
+          <label for="unavailable">Jours ou horaires où tu n'es pas libre <span class="opt">(facultatif)</span></label>
+          <textarea id="unavailable" placeholder="Ex. vendredi soir, cours de 8h à 12h"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="step" aria-labelledby="h-subjects">
+      <div class="step-num" aria-hidden="true">2</div>
+      <div>
+        <h2 id="h-subjects">Tes matières</h2>
+        <p class="step-hint">Une carte par matière, avec son nombre de chapitres.</p>
+      </div>
+      <div class="step-body">
+        <div id="subjects"></div>
+        <button class="btn btn-add" type="button" id="add">+ Ajouter une matière</button>
+      </div>
+    </section>
+
+    <section class="step" aria-labelledby="h-notes">
+      <div class="step-num" aria-hidden="true">3</div>
+      <div>
+        <h2 id="h-notes">Un dernier mot</h2>
+        <p class="step-hint">Tout ce qui m'aidera à faire un planning à ta mesure.</p>
+      </div>
+      <div class="step-body">
+        <div class="field">
+          <label for="notes">Remarques ou objectifs <span class="opt">(facultatif)</span></label>
+          <textarea id="notes" placeholder="Ex. je veux passer plus de temps sur les maths"></textarea>
+        </div>
+        <button class="btn btn-main" type="submit">Voir mes réponses</button>
+      </div>
+    </section>
+  </form>
+
+  <section class="result" id="result" hidden aria-labelledby="h-result">
+    <h2 id="h-result">Tes réponses</h2>
+    <p class="step-hint">Relis, puis envoie-les-moi.</p>
+    <div id="summary" class="summary"></div>
+    <button class="btn btn-wa" id="send" type="button">Envoyer sur WhatsApp</button>
+    <button class="btn btn-ghost" id="copy" type="button">Copier les réponses</button>
+    <p class="fine">L'envoi passe par WhatsApp. Rien n'est enregistré sur un serveur.</p>
+  </section>
+
+</main>
+
+<script>
+const subjects = document.getElementById('subjects');
+let uid = 0;
+
+function add() {
+  uid++;
+  const n = uid;
+  const d = document.createElement('div');
+  d.className = 'subject';
+  d.innerHTML = `
+    <div class="subjecthead">
+      <h3>Matière</h3>
+      <button type="button" class="remove">Supprimer</button>
+    </div>
+    <div class="field">
+      <label for="name-${n}">Nom de la matière</label>
+      <input id="name-${n}" class="subname" type="text" required placeholder="Ex. Mathématiques">
+    </div>
+    <div class="field">
+      <label for="chap-${n}">Nombre de chapitres</label>
+      <input id="chap-${n}" class="chapters" type="number" inputmode="numeric" min="1" step="1" required placeholder="Ex. 8">
+    </div>
+    <div class="field">
+      <span class="lbl" id="dl-${n}">Difficulté pour toi</span>
+      <div class="pills" role="radiogroup" aria-labelledby="dl-${n}">
+        <label class="pill"><input type="radio" name="diff-${n}" value="Facile"><span>Facile</span></label>
+        <label class="pill"><input type="radio" name="diff-${n}" value="Moyenne" checked><span>Moyenne</span></label>
+        <label class="pill"><input type="radio" name="diff-${n}" value="Difficile"><span>Difficile</span></label>
+      </div>
+    </div>`;
+  d.querySelector('.remove').onclick = () => {
+    if (subjects.children.length > 1) { d.remove(); renumber(); }
+    else alert('Il faut au moins une matière.');
+  };
+  subjects.append(d);
+  renumber();
+  return d;
+}
+
+function renumber() {
+  [...subjects.children].forEach((e, i) => {
+    e.querySelector('h3').textContent = 'Matière ' + (i + 1);
+  });
+}
+
+add();
+document.getElementById('add').onclick = () => add().querySelector('.subname').focus();
+
+/* Dates */
+const startEl = document.getElementById('start');
+const examEl = document.getElementById('exam');
+const countdown = document.getElementById('countdown');
+
+function parseDate(s) {
+  if (!s) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function fmt(s) {
+  const d = parseDate(s);
+  return d ? d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+}
+function updateCountdown() {
+  const a = parseDate(startEl.value), b = parseDate(examEl.value);
+  if (!a || !b) { countdown.textContent = ''; return; }
+  const days = Math.round((b - a) / 86400000);
+  if (days < 0) countdown.textContent = "L'examen tombe avant le début des révisions.";
+  else if (days === 0) countdown.textContent = "Examen le jour même.";
+  else countdown.textContent = `${days} jour${days > 1 ? 's' : ''} pour réviser.`;
+}
+startEl.addEventListener('input', updateCountdown);
+examEl.addEventListener('input', updateCountdown);
+
+/* Summary */
+let message = '';
+const form = document.getElementById('form');
+form.onsubmit = e => {
+  e.preventDefault();
+  if (!form.reportValidity()) return;
+  const v = id => document.getElementById(id).value.trim();
+  const list = [...subjects.children].map((d, i) =>
+    `${i + 1}. ${d.querySelector('.subname').value.trim()} : ${d.querySelector('.chapters').value} chapitre(s), difficulté ${d.querySelector('input[type=radio]:checked').value.toLowerCase()}`
+  );
+  message =
+`PLANNING DE RÉVISION
+
+Début des révisions : ${fmt(v('start'))}
+Premier examen : ${fmt(v('exam'))}
+Temps disponible : ${v('hours')} h par jour
+
+Matières (${list.length}) :
+${list.join('\n')}
+
+Indisponibilités : ${v('unavailable') || 'aucune précisée'}
+Remarques : ${v('notes') || 'aucune'}`;
+  document.getElementById('summary').textContent = message;
+  const r = document.getElementById('result');
+  r.hidden = false;
+  r.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+};
+
+document.getElementById('send').onclick = () =>
+  window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener');
+
+document.getElementById('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(message); alert('Réponses copiées.'); }
+  catch { alert('Sélectionne le texte et copie-le à la main.'); }
+};
+</script>
+</body>
+</html>
